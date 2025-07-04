@@ -3,12 +3,17 @@ import json
 from evidently import Report
 from evidently.presets import DataDriftPreset
 from slack_sdk.webhook import WebhookClient
-import os
 
 # === CONFIGURATION ===
-reference_csv_path = "c:/Users/Administrator/Desktop/drift-monitoring/data/batch_normal.csv"
-current_csv_path = "c:/Users/Administrator/Desktop/drift-monitoring/data/test_normal.csv"
-report_path = "c:/Users/Administrator/Desktop/drift-monitoring/reports/drift_report.html"
+reference_csv_path = (
+    "c:/Users/Administrator/Desktop/drift-monitoring/data/batch_normal.csv"
+)
+current_csv_path = (
+    "c:/Users/Administrator/Desktop/drift-monitoring/data/test_normal.csv"
+)
+report_path = (
+    "c:/Users/Administrator/Desktop/drift-monitoring/reports/drift_report.html"
+)
 slack_webhook_url = "https://hooks.slack.com/services/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"  # <-- Replace with your actual webhook URL
 
 # === LOAD DATA ===
@@ -23,7 +28,7 @@ current_data = current_data[common_columns]
 
 # === RUN DRIFT REPORT ===
 my_eval = Report(metrics=[DataDriftPreset()])
-my_eval= my_eval.run(reference_data=reference_data, current_data=current_data)
+my_eval = my_eval.run(reference_data=reference_data, current_data=current_data)
 
 # === Save HTML report ===
 
@@ -38,7 +43,9 @@ report_dict = json.loads(report_json)
 
 # Access first metric (DataDriftPreset)
 try:
-    drift_detected = report_dict.get("metrics", [])[0].get("result", {}).get("dataset_drift", False)
+    drift_detected = (
+        report_dict.get("metrics", [])[0].get("result", {}).get("dataset_drift", False)
+    )
 except (IndexError, AttributeError, KeyError):
     drift_detected = False
 

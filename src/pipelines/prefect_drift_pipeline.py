@@ -5,14 +5,17 @@ from evidently import Report
 from evidently.presets import DataDriftPreset
 import os
 
+
 @task
 def load_data(path):
     return pd.read_csv(path)
+
 
 @task
 def align_columns(ref, curr):
     common = ref.columns.intersection(curr.columns)
     return ref[common], curr[common]
+
 
 @task
 def run_drift_monitor(reference_data, current_data, report_path):
@@ -29,9 +32,14 @@ def run_drift_monitor(reference_data, current_data, report_path):
     report_json = my_eval.json()
     report_dict = json.loads(report_json)
     try:
-        return report_dict.get("metrics", [])[0].get("result", {}).get("dataset_drift", False)
+        return (
+            report_dict.get("metrics", [])[0]
+            .get("result", {})
+            .get("dataset_drift", False)
+        )
     except Exception:
         return False
+
 
 @flow(name="ML Drift Monitoring Pipeline")
 def drift_monitor_flow():
@@ -48,6 +56,7 @@ def drift_monitor_flow():
         print("⚠️  Drift detected!")
     else:
         print("✅ No drift detected.")
+
 
 if __name__ == "__main__":
     drift_monitor_flow()

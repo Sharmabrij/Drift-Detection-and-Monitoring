@@ -27,7 +27,7 @@ print("✅ Drifted test data saved.")
 
 # === Step 2: Run Drift Report ===
 my_eval = Report(metrics=[DataDriftPreset()])
-my_eval= my_eval.run(reference_data=reference_data, current_data=drifted_data)
+my_eval = my_eval.run(reference_data=reference_data, current_data=drifted_data)
 
 # Save HTML report
 os.makedirs("reports", exist_ok=True)
@@ -39,7 +39,9 @@ report_json = my_eval.json()
 report_dict = json.loads(report_json)
 
 try:
-    drift_detected = report_dict.get("metrics", [])[0].get("result", {}).get("dataset_drift", False)
+    drift_detected = (
+        report_dict.get("metrics", [])[0].get("result", {}).get("dataset_drift", False)
+    )
 except (IndexError, AttributeError, KeyError):
     drift_detected = True
 
@@ -50,7 +52,11 @@ if drift_detected:
     try:
         webhook = WebhookClient(slack_webhook_url)
         response = webhook.send(text=message)
-        print("📢 Slack alert sent." if response.status_code == 200 else f"❌ Failed: {response.status_code}")
+        print(
+            "📢 Slack alert sent."
+            if response.status_code == 200
+            else f"❌ Failed: {response.status_code}"
+        )
     except Exception as e:
         print(f"⚠️ Slack Error: {e}")
 else:

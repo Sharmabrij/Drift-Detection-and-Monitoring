@@ -7,3 +7,7 @@ __pycache__/
 .DS_Store
 .env
 .venv
+echo "venv/" >> .gitignore
+echo "__pycache__/" >> .gitignore
+echo "*.pyc" >> .gitignore
+echo "data/*.csv" >> .gitignore  # if you want to exclude large data files

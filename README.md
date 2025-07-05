@@ -30,15 +30,8 @@ This project monitors feature drift in machine learning systems by comparing **p
 * **Streamlit Dashboard**: Live visualization of PSI scores over time.
 * **CI/CD**: GitHub Actions for formatting, linting, testing, and deploying.
 
-flowchart TD
-    A[Start Flow] --> B[Load Reference Data]
-    B --> C[Load Production Data]
-    C --> D[Calculate PSI]
-    D --> E[Determine Drift Status]
-    E --> F[Log Result to CSV]
-    E --> G[Send Slack Alert if Drift]
-    F --> H[End Flow]
-    G --> H
+[image](https://github.com/user-attachments/assets/f9f0d1eb-49b3-4ad0-90ac-e1af2e449e20)
+
 
 ---
 

@@ -13,7 +13,7 @@ This project monitors feature drift in machine learning systems by comparing **p
 
 ##  Architecture
 
-![Architecture Diagram]![ChatGPT Image Jul 5, 2025, 12_36_35 PM](https://github.com/user-attachments/assets/d5cac1ed-e3ca-44e9-b859-fefa11c5fdda)
+[Architecture Diagram]![ChatGPT Image Jul 5, 2025, 12_36_35 PM](https://github.com/user-attachments/assets/d5cac1ed-e3ca-44e9-b859-fefa11c5fdda)
 
 
 **Key Components:**
@@ -29,6 +29,16 @@ This project monitors feature drift in machine learning systems by comparing **p
 * **Logging**: Drift metrics saved as CSV in `logs/`.
 * **Streamlit Dashboard**: Live visualization of PSI scores over time.
 * **CI/CD**: GitHub Actions for formatting, linting, testing, and deploying.
+
+flowchart TD
+    A[Start Flow] --> B[Load Reference Data]
+    B --> C[Load Production Data]
+    C --> D[Calculate PSI]
+    D --> E[Determine Drift Status]
+    E --> F[Log Result to CSV]
+    E --> G[Send Slack Alert if Drift]
+    F --> H[End Flow]
+    G --> H
 
 ---
 
@@ -94,6 +104,14 @@ ruff check src/ --fix
 
 ```bash
 streamlit run streamlit_app.py
+
+flowchart TD
+    A[User Loads Streamlit Page] --> B{Log File Exists?}
+    B -- Yes --> C[Read CSV Log File]
+    C --> D[Plot PSI Over Time]
+    C --> E[Display Table with Drift Status]
+    B -- No --> F[Show Warning: No Log Found]
+
 ```
 
 ---
@@ -107,6 +125,16 @@ streamlit run streamlit_app.py
 * ✅ Run unit tests
 * ✅ Upload coverage
 * ✅ (Optional) Deploy to Streamlit Cloud
+
+flowchart TD
+    A[Push to GitHub] --> B[Run Black Formatter]
+    B --> C[Run Ruff Linter]
+    C --> D[Run Pytest with Coverage]
+    D --> E[Upload Coverage Report]
+    E --> F{Deploy?}
+    F -- Yes --> G[Deploy to Streamlit Cloud / Hugging Face]
+    F -- No --> H[CI Completed]
+    G --> H
 
 ---
 

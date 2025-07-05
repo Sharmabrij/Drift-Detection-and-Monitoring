@@ -1,96 +1,99 @@
-# Drift Monitoring System
-
-A production-grade **PSI (Population Stability Index) drift monitoring** system using **Prefect**, **Streamlit**, and **Slack alerts**. This project continuously evaluates data drift in ML pipelines and notifies stakeholders when significant deviations occur.
+Here's a formatted `README.md` based on the architecture diagram and project structure reflected in the image you provided:
 
 ---
 
-## 📊 Overview Diagram
+# 🧠 Drift Monitoring System (PSI-Based)
 
-```mermaid
-graph TD
-    A[Reference Data (Parquet)] -->|compared to| B[New Production Data]
-    B --> C[Calculate PSI (Prefect Flow)]
-    C --> D{PSI Thresholds}
-    D -->|< 0.1| E[No Drift]
-    D -->|0.1 - 0.25| F[Possible Drift]
-    D -->|> 0.25| G[Likely Drift]
-    E & F & G --> H[Log to CSV]
-    G --> I[Send Slack Alert]
-    H --> J[Streamlit Dashboard]
-```
+A real-time data drift monitoring tool using **Population Stability Index (PSI)**, powered by **Prefect**, **Slack**, **Streamlit**, and CI/CD integrations.
 
 ---
 
-## 🏃‍️ Features
+## 📊 Overview
 
-* PSI drift detection with customizable thresholds
-* Prefect for orchestration
-* Slack webhook alerts for Likely Drift
-* Logs PSI scores to CSV
-* Streamlit dashboard to visualize drift over time
-* CI/CD with Black, Ruff, Pytest, and Codecov
+This project monitors feature drift in machine learning systems by comparing **production data** against a **reference dataset** using **PSI**. Alerts are sent via **Slack**, logs are stored in CSV format, and a **Streamlit dashboard** visualizes the drift history.
 
 ---
 
-## 👁️ Streamlit Dashboard
+## 🔧 Architecture
 
-![](assets/dashboard-example.png) <!-- Replace with actual image path -->
+![Architecture Diagram]![ChatGPT Image Jul 5, 2025, 12_36_35 PM](https://github.com/user-attachments/assets/d5cac1ed-e3ca-44e9-b859-fefa11c5fdda)
 
-**Live Features:**
 
-* PSI score chart with threshold lines
-* Summary panel with latest status
-* Auto-refresh every 60s
-* Trigger manual check from UI
+**Key Components:**
 
----
+* **Reference & Production Data**: Ingested via Parquet or CSV/API.
+* **Prefect Flow**: Orchestrates PSI calculation, thresholding, logging, and alerting.
+* **PSI Thresholds**:
 
-## ⚙️ Technologies Used
-
-| Tool         | Purpose                         |
-| ------------ | ------------------------------- |
-| Python       | Core programming language       |
-| Prefect      | Workflow orchestration          |
-| Streamlit    | Monitoring dashboard            |
-| Plotly       | Time-series drift visualization |
-| Slack API    | Alerting mechanism              |
-| Pytest       | Testing framework               |
-| Ruff & Black | Linting + formatting            |
+  * `PSI < 0.1`: No Drift
+  * `0.1 ≤ PSI ≤ 0.25`: Possible Drift
+  * `PSI > 0.25`: Likely Drift
+* **Slack Alerts**: Instant notification if drift is detected.
+* **Logging**: Drift metrics saved as CSV in `logs/`.
+* **Streamlit Dashboard**: Live visualization of PSI scores over time.
+* **CI/CD**: GitHub Actions for formatting, linting, testing, and deploying.
 
 ---
 
-## 🎓 How PSI is Calculated
+## 🚀 Features
 
-```python
-def calculate_psi(ref_data: np.ndarray, prod_data: np.ndarray, buckets: int = 10) -> float:
-    ...
-```
-
-* PSI is computed for one numerical column
-* Uses equal-sized quantile buckets
-* Log and compare distributions
+* ✅ PSI Drift Detection
+* ✅ Prefect Flow Orchestration
+* ✅ Slack Alert Integration
+* ✅ Streamlit Dashboard
+* ✅ GitHub Actions CI/CD Pipeline
+* ✅ Test Coverage with `pytest` & `pytest-cov`
 
 ---
 
-## 📥 Installation
+## 🧪 Example PSI Status Output
+
+| Timestamp           | PSI Score | Drift Status   |
+| ------------------- | --------- | -------------- |
+| 2025-07-05 10:01:12 | 0.18      | Possible Drift |
+| 2025-07-04 10:01:12 | 0.06      | No Drift       |
+| 2025-07-03 10:01:12 | 0.31      | Likely Drift   |
+
+---
+
+## 🛠️ Installation
 
 ```bash
-git clone https://github.com/yourusername/drift-monitoring.git
+git clone https://github.com/your-org/drift-monitoring.git
 cd drift-monitoring
 python -m venv venv
-source venv/bin/activate  # or .\venv\Scripts\activate on Windows
+source venv/bin/activate  # or `venv\Scripts\activate` on Windows
 pip install -r requirements.txt
 ```
 
 ---
 
-## 🚀 Run the Flow
+## 📈 Running the Flow
 
 ```bash
-prefect deployment run psi-drift-check/manual
+python flows/psi_drift_detection_flow.py
 ```
 
-Or from dashboard:
+---
+
+## 🧪 Run Tests
+
+```bash
+pytest --cov=flows tests/
+```
+
+---
+
+## 🧼 Lint & Format
+
+```bash
+black src/
+ruff check src/ --fix
+```
+
+---
+
+## 🌐 Launch Streamlit Dashboard
 
 ```bash
 streamlit run streamlit_app.py
@@ -98,30 +101,23 @@ streamlit run streamlit_app.py
 
 ---
 
-## 📡 Slack Integration
+## 🔄 CI/CD (GitHub Actions)
 
-* Setup incoming webhook in Slack
-* Add `SLACK_WEBHOOK_URL` to `.env`
+`.github/workflows/ci-cd.yml`:
 
-```python
-send_slack_alert("PSI Drift Detected!", webhook_url=os.getenv("SLACK_WEBHOOK_URL"))
-```
-
----
-
-## 📅 CI/CD Pipeline
-
-### `.github/workflows/ci-cd.yml`
-
-```yaml
-steps:
-  - run: black . --check
-  - run: ruff check .
-  - run: pytest --cov=. --cov-report=xml
-  - uses: codecov/codecov-action@v4
-```
+* ✅ Auto-format using `black`
+* ✅ Lint with `ruff`
+* ✅ Run unit tests
+* ✅ Upload coverage
+* ✅ (Optional) Deploy to Streamlit Cloud
 
 ---
 
+## 📬 Slack Integration
 
+Configure the Slack webhook in `.env`:
+
+```bash
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/XXX/YYY/ZZZ
+```
 

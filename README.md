@@ -1,20 +1,17 @@
-Here's a formatted `README.md` based on the architecture diagram and project structure reflected in the image you provided:
 
----
-
-# 🧠 Drift Monitoring System (PSI-Based)
+#  Drift Monitoring System (PSI-Based)
 
 A real-time data drift monitoring tool using **Population Stability Index (PSI)**, powered by **Prefect**, **Slack**, **Streamlit**, and CI/CD integrations.
 
 ---
 
-## 📊 Overview
+##  Overview
 
 This project monitors feature drift in machine learning systems by comparing **production data** against a **reference dataset** using **PSI**. Alerts are sent via **Slack**, logs are stored in CSV format, and a **Streamlit dashboard** visualizes the drift history.
 
 ---
 
-## 🔧 Architecture
+##  Architecture
 
 ![Architecture Diagram]![ChatGPT Image Jul 5, 2025, 12_36_35 PM](https://github.com/user-attachments/assets/d5cac1ed-e3ca-44e9-b859-fefa11c5fdda)
 
@@ -35,7 +32,7 @@ This project monitors feature drift in machine learning systems by comparing **p
 
 ---
 
-## 🚀 Features
+##  Features
 
 * ✅ PSI Drift Detection
 * ✅ Prefect Flow Orchestration

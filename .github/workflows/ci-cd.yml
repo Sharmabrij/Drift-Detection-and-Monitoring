@@ -1,25 +1,34 @@
-name: CI/CD Pipeline
+name: CI/CD - Drift Monitoring
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v3
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
+      - name: 📦 Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest ruff black
 
-    - name: ✅ CI successful
-      run: echo "All checks passed!"
+      - name: 🧹 Ruff Lint
+        run: ruff check . --output-format=github
+
+      - name: 🎨 Black Formatting
+        run: black . --check
+
+      - name: 🧪 Pytest
+        run: pytest

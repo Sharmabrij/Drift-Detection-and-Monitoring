@@ -7,34 +7,46 @@ from datetime import datetime
 
 LOG_PATH = "logs/psi_drift_log.csv"
 
+def calculate_psi(ref, prod, bins=10):
+    if len(ref) == 0 or len(prod) == 0:
+        raise ValueError("Input arrays must not be empty.")
+
+    ref_hist, bin_edges = np.histogram(ref, bins=bins)
+    prod_hist, _ = np.histogram(prod, bins=bin_edges)
+
+    ref_perc = ref_hist / len(ref)
+    prod_perc = prod_hist / len(prod)
+
+    psi = np.sum((ref_perc - prod_perc) * np.log((ref_perc + 1e-6) / (prod_perc + 1e-6)))
+    return psi
 # ---- Slack Config ----
 SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"  # Replace with your actual webhook
 
 def send_slack_alert(psi, status):
+    """Send Slack alert only for drift"""
+    if status == "No Drift":
+        return  # Skip alert to avoid noise
+
+    webhook_url = os.getenv("SLACK_WEBHOOK_URL")  # Use env var for security
+    if not webhook_url:
+        print("❌ SLACK_WEBHOOK_URL not set.")
+        return
+
     message = {
-        "text": f"*🚨 Drift Alert Detected!*\n\n*Status:* {status}\n*PSI Score:* {round(psi, 4)}\n*Time:* {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\nCheck your monitoring dashboard for more details."
+        "text": f"⚠️ PSI Drift Detected\nPSI: `{round(psi, 4)}`\nStatus: *{status}*",
     }
+
     try:
-        response = requests.post(SLACK_WEBHOOK_URL, json=message)
-        if response.status_code == 200:
-            print("✅ Slack alert sent.")
-        else:
+        response = requests.post(webhook_url, json=message)
+        if response.status_code != 200:
             print(f"❌ Slack error: {response.status_code} - {response.text}")
     except Exception as e:
-        print("❌ Slack error:", e)
+        print(f"❌ Slack alert failed: {e}")
 
 def generate_data():
     ref_data = np.random.normal(0, 1, 1000)
     prod_data = np.random.normal(0.5, 1, 1000)
     return ref_data, prod_data
-
-def calculate_psi(ref, prod, bins=10):
-    ref_hist, bin_edges = np.histogram(ref, bins=bins)
-    prod_hist, _ = np.histogram(prod, bins=bin_edges)
-    ref_perc = ref_hist / len(ref)
-    prod_perc = prod_hist / len(prod)
-    psi = np.sum((ref_perc - prod_perc) * np.log((ref_perc + 1e-6) / (prod_perc + 1e-6)))
-    return psi
 
 def get_drift_status(psi):
     if psi < 0.1:
@@ -74,3 +86,4 @@ def psi_drift_detection_flow():
 
 if __name__ == "__main__":
     psi_drift_detection_flow()
+

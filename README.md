@@ -30,7 +30,7 @@ This project monitors feature drift in machine learning systems by comparing **p
 * **Streamlit Dashboard**: Live visualization of PSI scores over time.
 * **CI/CD**: GitHub Actions for formatting, linting, testing, and deploying.
 
-[image](https://github.com/user-attachments/assets/f9f0d1eb-49b3-4ad0-90ac-e1af2e449e20)
+![image](https://github.com/user-attachments/assets/f9f0d1eb-49b3-4ad0-90ac-e1af2e449e20)
 
 
 ---
@@ -98,12 +98,6 @@ ruff check src/ --fix
 ```bash
 streamlit run streamlit_app.py
 
-flowchart TD
-    A[User Loads Streamlit Page] --> B{Log File Exists?}
-    B -- Yes --> C[Read CSV Log File]
-    C --> D[Plot PSI Over Time]
-    C --> E[Display Table with Drift Status]
-    B -- No --> F[Show Warning: No Log Found]
 
 ```
 
@@ -119,15 +113,7 @@ flowchart TD
 * ✅ Upload coverage
 * ✅ (Optional) Deploy to Streamlit Cloud
 
-flowchart TD
-    A[Push to GitHub] --> B[Run Black Formatter]
-    B --> C[Run Ruff Linter]
-    C --> D[Run Pytest with Coverage]
-    D --> E[Upload Coverage Report]
-    E --> F{Deploy?}
-    F -- Yes --> G[Deploy to Streamlit Cloud / Hugging Face]
-    F -- No --> H[CI Completed]
-    G --> H
+
 
 ---
 

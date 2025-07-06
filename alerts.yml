@@ -1,0 +1,271 @@
+groups:
+  - name: ml-pipeline-alerts
+    rules:
+      # Drift Detection Alerts
+      - alert: HighDriftDetected
+        expr: drift_detection_psi_score > 0.25
+        for: 5m
+        labels:
+          severity: critical
+          team: ml
+        annotations:
+          summary: "High drift detected in model {{ $labels.model_name }}"
+          description: "PSI score {{ $value }} exceeds threshold of 0.25 for model {{ $labels.model_name }}"
+
+      - alert: MediumDriftDetected
+        expr: drift_detection_psi_score > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Medium drift detected in model {{ $labels.model_name }}"
+          description: "PSI score {{ $value }} exceeds threshold of 0.1 for model {{ $labels.model_name }}"
+
+      - alert: FeatureDriftDetected
+        expr: feature_drift_psi_score > 0.3
+        for: 5m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Feature drift detected in {{ $labels.feature_name }}"
+          description: "Feature {{ $labels.feature_name }} has PSI score {{ $value }} for model {{ $labels.model_name }}"
+
+      # Model Performance Alerts
+      - alert: ModelAccuracyDegraded
+        expr: model_accuracy < 0.8
+        for: 15m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Model accuracy degraded for {{ $labels.model_name }}"
+          description: "Model {{ $labels.model_name }} v{{ $labels.version }} accuracy is {{ $value }}"
+
+      - alert: ModelConfidenceLow
+        expr: model_confidence_score < 0.7
+        for: 10m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Low model confidence for {{ $labels.model_name }}"
+          description: "Model {{ $labels.model_name }} v{{ $labels.version }} confidence is {{ $value }}"
+
+      - alert: ModelPredictionLatencyHigh
+        expr: histogram_quantile(0.95, model_prediction_latency_seconds) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "High prediction latency for {{ $labels.model_name }}"
+          description: "95th percentile latency is {{ $value }}s for model {{ $labels.model_name }}"
+
+      # Kafka Alerts
+      - alert: KafkaProducerDown
+        expr: rate(kafka_producer_messages_total[5m]) == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "Kafka producer is down"
+          description: "No messages being produced to topic {{ $labels.topic }}"
+
+      - alert: KafkaConsumerDown
+        expr: rate(kafka_consumer_messages_total[5m]) == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "Kafka consumer is down"
+          description: "No messages being consumed from topic {{ $labels.topic }}"
+
+      - alert: KafkaMessageLatencyHigh
+        expr: histogram_quantile(0.95, kafka_message_latency_seconds) > 5.0
+        for: 5m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "High Kafka message latency"
+          description: "95th percentile latency is {{ $value }}s for {{ $labels.operation }}"
+
+      # Pipeline Alerts
+      - alert: PrefectFlowFailed
+        expr: increase(prefect_flow_runs_total{status="failed"}[5m]) > 0
+        labels:
+          severity: critical
+          team: ml
+        annotations:
+          summary: "Prefect flow failed: {{ $labels.flow_name }}"
+          description: "Flow {{ $labels.flow_name }} has failed in the last 5 minutes"
+
+      - alert: PipelineStageSlow
+        expr: histogram_quantile(0.95, pipeline_stage_duration_seconds) > 300
+        for: 5m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Pipeline stage is slow: {{ $labels.stage_name }}"
+          description: "Stage {{ $labels.stage_name }} in pipeline {{ $labels.pipeline_name }} is taking {{ $value }}s"
+
+      # Model Registry Alerts
+      - alert: ModelRegistryDown
+        expr: up{job="ml-pipeline-metrics"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: ml
+        annotations:
+          summary: "Model registry is down"
+          description: "Model registry metrics endpoint is not responding"
+
+      - alert: NoModelsRegistered
+        expr: model_registry_total_models == 0
+        for: 10m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "No models registered in registry"
+          description: "Model registry is empty"
+
+      # System Resource Alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}%"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value }}%"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Disk usage is {{ $value }}%"
+
+      # Data Quality Alerts
+      - alert: DataQualityDegraded
+        expr: data_quality_score < 0.8
+        for: 10m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Data quality degraded for {{ $labels.dataset }}"
+          description: "Data quality score is {{ $value }} for {{ $labels.metric }}"
+
+      # Business Impact Alerts
+      - alert: BusinessImpactHigh
+        expr: business_impact_score > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          team: ml
+        annotations:
+          summary: "High business impact detected for {{ $labels.model_name }}"
+          description: "Business impact score is {{ $value }} for {{ $labels.metric }}"
+
+      # Service Health Alerts
+      - alert: MLflowDown
+        expr: up{job="mlflow"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: ml
+        annotations:
+          summary: "MLflow tracking server is down"
+          description: "MLflow metrics endpoint is not responding"
+
+      - alert: PrefectServerDown
+        expr: up{job="prefect-server"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: ml
+        annotations:
+          summary: "Prefect server is down"
+          description: "Prefect server metrics endpoint is not responding"
+
+      - alert: StreamlitAppDown
+        expr: up{job="streamlit-app"} == 0
+        for: 1m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Streamlit app is down"
+          description: "Streamlit app metrics endpoint is not responding"
+
+      # Container Health Alerts
+      - alert: ContainerRestarting
+        expr: increase(container_restarts_total[5m]) > 0
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "Container is restarting: {{ $labels.name }}"
+          description: "Container {{ $labels.name }} has restarted {{ $value }} times in the last 5 minutes"
+
+      - alert: ContainerMemoryHigh
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "High container memory usage: {{ $labels.name }}"
+          description: "Container {{ $labels.name }} memory usage is {{ $value }}%"
+
+      # Custom ML Pipeline Alerts
+      - alert: DriftDetectionStopped
+        expr: rate(drift_detection_psi_score[5m]) == 0
+        for: 5m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Drift detection has stopped"
+          description: "No drift detection metrics being reported"
+
+      - alert: ModelPredictionsStopped
+        expr: rate(model_predictions_total[5m]) == 0
+        for: 5m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Model predictions have stopped"
+          description: "No model predictions being made for {{ $labels.model_name }}"
+
+      - alert: PipelineExecutionStopped
+        expr: rate(prefect_flow_runs_total[10m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Pipeline execution has stopped"
+          description: "No Prefect flows have been executed in the last 10 minutes" 

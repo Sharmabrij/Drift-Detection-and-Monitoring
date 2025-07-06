@@ -1,0 +1,103 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alerts.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Metrics Collector (ML Pipeline Metrics)
+  - job_name: 'ml-pipeline-metrics'
+    static_configs:
+      - targets: ['metrics-collector:8000']
+    scrape_interval: 10s
+    metrics_path: '/metrics'
+    honor_labels: true
+
+  # Kafka Metrics
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka:9101']
+    scrape_interval: 15s
+    metrics_path: '/metrics'
+    honor_labels: true
+
+  # MLflow Metrics
+  - job_name: 'mlflow'
+    static_configs:
+      - targets: ['mlflow:5000']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+    honor_labels: true
+
+  # Prefect Server Metrics
+  - job_name: 'prefect-server'
+    static_configs:
+      - targets: ['prefect-server:4200']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+    honor_labels: true
+
+  # Node Exporter (System Metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # Cadvisor (Container Metrics)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 15s
+
+  # Redis Metrics
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    scrape_interval: 15s
+
+  # PostgreSQL Metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    scrape_interval: 30s
+
+  # Streamlit App Metrics
+  - job_name: 'streamlit-app'
+    static_configs:
+      - targets: ['streamlit-app:8501']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+
+  # Grafana Metrics
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+
+  # AlertManager Metrics
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+
+  # Custom ML Pipeline Health Checks
+  - job_name: 'ml-pipeline-health'
+    static_configs:
+      - targets: ['metrics-collector:8000']
+    scrape_interval: 30s
+    metrics_path: '/health'
+    honor_labels: true 

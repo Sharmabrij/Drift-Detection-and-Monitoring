@@ -1,0 +1,121 @@
+global:
+  resolve_timeout: 5m
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'web.hook'
+  routes:
+    - match:
+        severity: critical
+      receiver: 'slack-critical'
+      continue: true
+    - match:
+        severity: warning
+      receiver: 'slack-warning'
+      continue: true
+    - match:
+        alertname: HighDriftDetected
+      receiver: 'ml-team'
+      continue: true
+    - match:
+        alertname: ModelPerformanceDegraded
+      receiver: 'ml-team'
+      continue: true
+    - match:
+        alertname: PipelineFailure
+      receiver: 'devops-team'
+      continue: true
+
+receivers:
+  - name: 'web.hook'
+    webhook_configs:
+      - url: 'http://127.0.0.1:5001/'
+
+  - name: 'slack-critical'
+    slack_configs:
+      - channel: '#ml-alerts-critical'
+        title: '🚨 Critical Alert: {{ .GroupLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+            *Alert:* {{ .Annotations.summary }}
+            *Description:* {{ .Annotations.description }}
+            *Severity:* {{ .Labels.severity }}
+            *Instance:* {{ .Labels.instance }}
+            *Started:* {{ .StartsAt | since }}
+          {{ end }}
+        color: 'danger'
+        send_resolved: true
+
+  - name: 'slack-warning'
+    slack_configs:
+      - channel: '#ml-alerts-warning'
+        title: '⚠️ Warning Alert: {{ .GroupLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+            *Alert:* {{ .Annotations.summary }}
+            *Description:* {{ .Annotations.description }}
+            *Severity:* {{ .Labels.severity }}
+            *Instance:* {{ .Labels.instance }}
+            *Started:* {{ .StartsAt | since }}
+          {{ end }}
+        color: 'warning'
+        send_resolved: true
+
+  - name: 'ml-team'
+    slack_configs:
+      - channel: '#ml-team'
+        title: '🤖 ML Pipeline Alert: {{ .GroupLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+            *Alert:* {{ .Annotations.summary }}
+            *Description:* {{ .Annotations.description }}
+            *Model:* {{ .Labels.model_name }}
+            *PSI Score:* {{ .Labels.psi_score }}
+            *Started:* {{ .StartsAt | since }}
+          {{ end }}
+        color: 'good'
+        send_resolved: true
+    email_configs:
+      - to: 'ml-team@company.com'
+        subject: 'ML Pipeline Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Model: {{ .Labels.model_name }}
+          Started: {{ .StartsAt | since }}
+
+  - name: 'devops-team'
+    slack_configs:
+      - channel: '#devops-alerts'
+        title: '🔧 Infrastructure Alert: {{ .GroupLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+            *Alert:* {{ .Annotations.summary }}
+            *Description:* {{ .Annotations.description }}
+            *Service:* {{ .Labels.service }}
+            *Instance:* {{ .Labels.instance }}
+            *Started:* {{ .StartsAt | since }}
+          {{ end }}
+        color: 'danger'
+        send_resolved: true
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']
+
+  - source_match:
+      alertname: 'HighDriftDetected'
+    target_match:
+      alertname: 'ModelPerformanceDegraded'
+    equal: ['model_name']
+
+templates:
+  - '/etc/alertmanager/template/*.tmpl' 

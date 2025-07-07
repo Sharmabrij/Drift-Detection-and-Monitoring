@@ -368,12 +368,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **MLflow** for experiment tracking
 - **Streamlit** for interactive dashboards
 
-## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/drift-monitoring/issues)
-- **Documentation**: [Wiki](https://github.com/yourusername/drift-monitoring/wiki)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/drift-monitoring/discussions)
-
----
-
-**Made with ❤️ for production ML systems**

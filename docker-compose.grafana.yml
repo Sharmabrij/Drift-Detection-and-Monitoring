@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   # Zookeeper
@@ -260,7 +260,7 @@ services:
       - ./streamlit_ml_pipeline_app.py:/app/streamlit_app.py
     working_dir: /app
     command: >
-      bash -c "pip install streamlit pandas plotly mlflow prefect kafka-python prometheus-client && 
+      bash -c "pip install streamlit pandas plotly mlflow prefect kafka-python prometheus-client tensorflow && 
                streamlit run streamlit_app.py --server.port 8501 --server.address 0.0.0.0"
     restart: unless-stopped
     depends_on:

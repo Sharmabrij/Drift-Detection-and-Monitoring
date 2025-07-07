@@ -1,6 +1,5 @@
 from prometheus_client import Gauge, start_http_server
 import time 
-
 from prefect import flow
 import pandas as pd
 import numpy as np

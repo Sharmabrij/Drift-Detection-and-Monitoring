@@ -61,11 +61,25 @@ class DriftDataProducer:
             if 'timestamp' not in data:
                 data['timestamp'] = datetime.now().isoformat()
             
+            # Convert pandas Timestamp to string if present
+            if 'timestamp' in data and hasattr(data['timestamp'], 'isoformat'):
+                data['timestamp'] = data['timestamp'].isoformat()
+            
+            # Ensure all values are JSON serializable
+            serializable_data = {}
+            for k, v in data.items():
+                if hasattr(v, 'isoformat'):  # Handle datetime/timestamp objects
+                    serializable_data[k] = v.isoformat()
+                elif hasattr(v, 'item'):  # Handle numpy types
+                    serializable_data[k] = v.item()
+                else:
+                    serializable_data[k] = v
+            
             # Send to Kafka
             future = self.producer.send(
                 topic=self.topic,
                 key=key,
-                value=data
+                value=serializable_data
             )
             
             # Wait for send to complete
@@ -117,7 +131,7 @@ class DriftDataProducer:
         # Create DataFrame
         df = pd.DataFrame(data, columns=[f'feature{i}' for i in range(1, 6)])
         df['target'] = np.random.randint(0, 2, n_samples)
-        df['timestamp'] = pd.Timestamp.now()
+        df['timestamp'] = datetime.now().isoformat()  # Use string timestamp instead of pandas Timestamp
         
         # Send to Kafka
         return self.send_batch(df)
